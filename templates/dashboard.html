@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title mb-4">Dashboard</h1>
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="card card-kpi"><div class="card-body"><div class="text-muted">Vendas hoje</div><div class="display-6">{{ vendas_hoje }}</div></div></div></div>
+  <div class="col-md-3"><div class="card card-kpi"><div class="card-body"><div class="text-muted">Faturamento hoje</div><div class="h3">{{ faturamento|moeda }}</div></div></div></div>
+  <div class="col-md-3"><div class="card card-kpi"><div class="card-body"><div class="text-muted">Itens críticos</div><div class="display-6">{{ insumos_criticos|length + produtos_criticos|length }}</div></div></div></div>
+  <div class="col-md-3"><div class="card card-kpi"><div class="card-body"><div class="text-muted">Desperdício hoje</div><div class="h3">{{ desperdicio|moeda }}</div></div></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold">Insumos em nível crítico</div>
+      <div class="card-body">
+        {% if insumos_criticos %}
+          <ul class="list-group list-group-flush">
+          {% for item in insumos_criticos %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>{{ item.nome }}</span><span class="badge text-bg-danger">{{ item.qtd_atual|numero }} {{ item.unidade_medida }}</span>
+            </li>
+          {% endfor %}
+          </ul>
+        {% else %}<div class="alert alert-success mb-0">Estoque de insumos regular.</div>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header fw-bold">Produtos em nível crítico</div>
+      <div class="card-body">
+        {% if produtos_criticos %}
+          <ul class="list-group list-group-flush">
+          {% for item in produtos_criticos %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>{{ item.nome }}</span><span class="badge text-bg-danger">{{ item.qtd_atual|numero }}</span>
+            </li>
+          {% endfor %}
+          </ul>
+        {% else %}<div class="alert alert-success mb-0">Estoque de produtos regular.</div>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Relatório de Vendas e Faturamento</h1>
+<form class="row g-2 mb-4 no-print">
+<div class="col-auto"><input class="form-control" type="date" name="inicio" value="{{ inicio }}"></div>
+<div class="col-auto"><input class="form-control" type="date" name="fim" value="{{ fim }}"></div>
+<div class="col-auto"><button class="btn btn-dark">Gerar relatório</button></div>
+<div class="col-auto"><button type="button" class="btn btn-outline-secondary" onclick="window.print()">Imprimir / PDF</button></div>
+</form>
+<div class="row g-3 mb-4">
+<div class="col-md-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted">Faturamento</div><div class="h3">{{ faturamento|moeda }}</div></div></div></div>
+<div class="col-md-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted">Vendas</div><div class="h3">{{ vendas|length }}</div></div></div></div>
+<div class="col-md-4"><div class="card border-0 shadow-sm"><div class="card-body"><div class="text-muted">Ticket médio</div><div class="h3">{{ ticket|moeda }}</div></div></div></div>
+</div>
+<h5>Produtos mais vendidos</h5>
+<table class="table table-sm"><tr><th>Produto</th><th>Quantidade</th></tr>{% for nome,qtd in ranking %}<tr><td>{{ nome }}</td><td>{{ qtd|numero }}</td></tr>{% else %}<tr><td colspan="2">Nenhuma venda no período.</td></tr>{% endfor %}</table>
+<h5>Por forma de pagamento</h5>
+<table class="table table-sm"><tr><th>Forma</th><th>Total</th></tr>{% for nome,total in pagamentos.items() %}<tr><td>{{ nome }}</td><td>{{ total|moeda }}</td></tr>{% endfor %}</table>
+{% endblock %}

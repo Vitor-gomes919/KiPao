@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Fornecedores</h1>
+<div class="row g-4">
+<div class="col-lg-4">
+<div class="card border-0 shadow-sm"><div class="card-body">
+<h5>Novo fornecedor</h5>
+<form method="post">
+<input class="form-control mb-2" name="razao_social" placeholder="Razão Social / Nome" required>
+<input class="form-control mb-2" name="documento" placeholder="CNPJ / CPF" required>
+<input class="form-control mb-2" name="telefone" placeholder="Telefone">
+<input class="form-control mb-2" type="email" name="email" placeholder="E-mail">
+<input class="form-control mb-3" name="endereco" placeholder="Endereço">
+<button class="btn btn-dark w-100">Salvar</button>
+</form>
+</div></div>
+</div>
+<div class="col-lg-8">
+<table class="table table-striped">
+<tr><th>Fornecedor</th><th>Documento</th><th>Telefone</th><th>Status</th><th></th></tr>
+{% for f in fornecedores %}
+<tr>
+<td>{{ f.razao_social }}</td><td>{{ f.documento }}</td><td>{{ f.telefone or "-" }}</td><td>{{ "Ativo" if f.ativo else "Inativo" }}</td>
+<td><form method="post" action="{{ url_for('fornecedor_toggle', id=f.id) }}"><button class="btn btn-sm btn-outline-secondary">Ativar/Inativar</button></form></td>
+</tr>
+{% endfor %}
+</table>
+</div></div>
+{% endblock %}

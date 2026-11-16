@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Compras / Entrada de Insumos</h1>
+<form method="post" class="card border-0 shadow-sm mb-4">
+<div class="card-body">
+<label class="form-label">Fornecedor</label>
+<select class="form-select mb-3" name="fornecedor_id" required>
+<option value="">Selecione...</option>
+{% for f in fornecedores %}<option value="{{ f.id }}">{{ f.razao_social }}</option>{% endfor %}
+</select>
+<table class="table" id="itens">
+<thead><tr><th>Insumo</th><th>Quantidade</th><th>Preço unitário</th><th></th></tr></thead>
+<tbody></tbody>
+</table>
+<button type="button" class="btn btn-outline-secondary" onclick="addItem()">+ Adicionar item</button>
+<button class="btn btn-dark">Confirmar compra</button>
+</div>
+</form>
+
+<h4>Últimas compras</h4>
+<table class="table table-striped">
+<tr><th>Data</th><th>Fornecedor</th><th>Usuário</th><th>Total</th></tr>
+{% for c in historico %}<tr><td>{{ c.data_hora.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ c.fornecedor.razao_social }}</td><td>{{ c.usuario.nome }}</td><td>{{ c.valor_total|moeda }}</td></tr>{% endfor %}
+</table>
+
+<template id="linha">
+<tr>
+<td><select class="form-select" name="insumo_id" required><option value="">Selecione...</option>{% for i in insumos %}<option value="{{ i.id }}">{{ i.nome }}</option>{% endfor %}</select></td>
+<td><input class="form-control" type="number" step="0.001" min="0.001" name="quantidade" required></td>
+<td><input class="form-control" type="number" step="0.01" min="0" name="preco_unitario" required></td>
+<td><button type="button" class="btn btn-outline-danger" onclick="this.closest('tr').remove()">Remover</button></td>
+</tr>
+</template>
+{% endblock %}
+{% block scripts %}
+<script>
+function addItem(){document.querySelector("#itens tbody").appendChild(document.querySelector("#linha").content.cloneNode(true));}
+addItem();
+</script>
+{% endblock %}

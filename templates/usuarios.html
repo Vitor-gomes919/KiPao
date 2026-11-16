@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Usuários</h1>
+<div class="row g-4">
+<div class="col-lg-4">
+  <div class="card shadow-sm border-0"><div class="card-body">
+    <h5>Novo usuário</h5>
+    <form method="post">
+      <input class="form-control mb-2" name="nome" placeholder="Nome" required>
+      <input class="form-control mb-2" name="email" type="email" placeholder="E-mail" required>
+      <input class="form-control mb-2" name="senha" type="password" placeholder="Senha" required>
+      <select class="form-select mb-3" name="perfil">
+        <option value="FUNCIONARIO">Funcionário</option>
+        <option value="ADMIN">Administrador</option>
+      </select>
+      <button class="btn btn-dark w-100">Salvar</button>
+    </form>
+  </div></div>
+</div>
+<div class="col-lg-8">
+<table class="table table-striped">
+<tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th></th></tr>
+{% for u in usuarios %}
+<tr>
+<td>{{ u.nome }}</td><td>{{ u.email }}</td><td>{{ u.perfil }}</td>
+<td>{{ "Ativo" if u.ativo else "Inativo" }}</td>
+<td><form method="post" action="{{ url_for('usuario_toggle', id=u.id) }}"><button class="btn btn-sm btn-outline-secondary">Ativar/Inativar</button></form></td>
+</tr>
+{% endfor %}
+</table>
+</div></div>
+{% endblock %}

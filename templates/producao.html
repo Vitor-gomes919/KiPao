@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Produção Diária</h1>
+<div class="row g-4">
+<div class="col-lg-5">
+<div class="card border-0 shadow-sm"><div class="card-body">
+<h5>Registrar nova produção</h5>
+<form method="post">
+<label class="form-label">Produto</label>
+<select class="form-select mb-3" name="produto_id" required>
+<option value="">Selecione...</option>
+{% for p in produtos %}<option value="{{ p.id }}">{{ p.nome }}{% if not p.receita %} — sem receita{% endif %}</option>{% endfor %}
+</select>
+<label class="form-label">Quantidade produzida</label>
+<input class="form-control mb-3" name="qtd_produzida" type="number" step="0.001" min="0.001" required>
+<button class="btn btn-dark w-100">Confirmar produção</button>
+</form>
+</div></div></div>
+<div class="col-lg-7">
+<h5>Produções recentes</h5>
+<table class="table table-striped">
+<tr><th>Data</th><th>Produto</th><th>Qtd.</th><th>Usuário</th></tr>
+{% for p in historico %}<tr><td>{{ p.data_hora.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ p.produto.nome }}</td><td>{{ p.qtd_produzida|numero }}</td><td>{{ p.usuario.nome }}</td></tr>{% endfor %}
+</table>
+</div>
+</div>
+{% endblock %}

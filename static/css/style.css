@@ -1,0 +1,38 @@
+body {
+    background: #f7f5ef;
+}
+.navbar-brand {
+    font-weight: 800;
+    letter-spacing: .4px;
+}
+.card-kpi {
+    border: 0;
+    box-shadow: 0 5px 18px rgba(0,0,0,.06);
+}
+.table td, .table th {
+    vertical-align: middle;
+}
+.badge-critico {
+    background: #b02a37;
+}
+.badge-ok {
+    background: #198754;
+}
+.page-title {
+    font-weight: 800;
+}
+.login-box {
+    max-width: 430px;
+    margin: 10vh auto;
+}
+.receipt {
+    max-width: 520px;
+    margin: 0 auto;
+    background: white;
+}
+@media print {
+    .no-print, nav, .alert {
+        display: none !important;
+    }
+    body { background: white; }
+}

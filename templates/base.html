@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Sistema Ki-Pão{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+{% if current_user.is_authenticated %}
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark mb-4 no-print">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('index') }}">🥖 Ki-Pão</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% if current_user.admin %}
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Dashboard</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Cadastros</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{{ url_for('usuarios') }}">Usuários</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('fornecedores') }}">Fornecedores</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('insumos') }}">Insumos</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('produtos') }}">Produtos</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('receitas') }}">Receitas</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('formas_pagamento') }}">Formas de pagamento</a></li>
+          </ul>
+        </li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('compras') }}">Compras</a></li>
+        {% endif %}
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('producao') }}">Produção</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('pdv') }}">PDV</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('perdas') }}">Perdas</a></li>
+        {% if current_user.admin %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Relatórios</a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{{ url_for('relatorio_vendas') }}">Vendas e faturamento</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('relatorio_compras') }}">Compras e custos</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('relatorio_desperdicio') }}">Desperdício</a></li>
+          </ul>
+        </li>
+        {% endif %}
+      </ul>
+      <span class="navbar-text me-3">{{ current_user.nome }} — {{ current_user.perfil }}</span>
+      <a class="btn btn-outline-light btn-sm" href="{{ url_for('logout') }}">Sair</a>
+    </div>
+  </div>
+</nav>
+{% endif %}
+
+<main class="container pb-5">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show no-print">
+          {{ message }}
+          <button class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

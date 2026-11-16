@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Receitas / Fichas Técnicas</h1>
+<p class="text-muted">A receita informa quanto de cada insumo é consumido para produzir determinado rendimento.</p>
+<div class="row g-3">
+{% for p in produtos %}
+<div class="col-md-4">
+  <div class="card border-0 shadow-sm h-100"><div class="card-body">
+    <h5>{{ p.nome }}</h5>
+    {% if p.receita %}
+      <p class="text-muted">{{ p.receita.itens|length }} insumo(s) · rendimento {{ p.receita.rendimento|numero }}</p>
+    {% else %}
+      <p class="text-danger">Receita ainda não cadastrada.</p>
+    {% endif %}
+    <a class="btn btn-outline-dark" href="{{ url_for('receita_editar', produto_id=p.id) }}">Editar receita</a>
+  </div></div>
+</div>
+{% else %}
+<p>Cadastre produtos primeiro.</p>
+{% endfor %}
+</div>
+{% endblock %}

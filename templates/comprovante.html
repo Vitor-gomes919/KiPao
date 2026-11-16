@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="receipt card border-0 shadow-sm">
+<div class="card-body p-4">
+<div class="text-center">
+<h2>🥖 Padaria Ki-Pão</h2>
+<div>Comprovante digital não fiscal</div>
+<hr>
+</div>
+<p><b>Venda:</b> #{{ venda.id }}<br>
+<b>Data:</b> {{ venda.data_hora.strftime('%d/%m/%Y %H:%M:%S') }}<br>
+<b>Operador:</b> {{ venda.usuario.nome }}<br>
+<b>Pagamento:</b> {{ venda.forma_pagamento.nome }}</p>
+<table class="table table-sm">
+<tr><th>Item</th><th>Qtd.</th><th>Unit.</th><th>Total</th></tr>
+{% for i in venda.itens %}
+<tr><td>{{ i.produto.nome }}</td><td>{{ i.quantidade|numero }}</td><td>{{ i.preco_unitario|moeda }}</td><td>{{ (i.quantidade*i.preco_unitario)|moeda }}</td></tr>
+{% endfor %}
+</table>
+<div class="text-end h4">Total: {{ venda.valor_total|moeda }}</div>
+<hr>
+<div class="text-center">Obrigado pela preferência!</div>
+<div class="d-flex gap-2 mt-4 no-print">
+<button class="btn btn-dark flex-fill" onclick="window.print()">Imprimir</button>
+<a class="btn btn-outline-secondary flex-fill" href="{{ url_for('pdv') }}">Nova venda</a>
+</div>
+</div>
+</div>
+{% endblock %}

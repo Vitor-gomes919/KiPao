@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Relatório de Desperdício</h1>
+<form class="row g-2 mb-4 no-print">
+<div class="col-auto"><input class="form-control" type="date" name="inicio" value="{{ inicio }}"></div>
+<div class="col-auto"><input class="form-control" type="date" name="fim" value="{{ fim }}"></div>
+<div class="col-auto">
+<select class="form-select" name="motivo"><option value="">Todos os motivos</option>
+{% for m in ["Vencimento","Quebra/Avaria","Consumo Interno","Outro"] %}<option {% if motivo==m %}selected{% endif %}>{{ m }}</option>{% endfor %}
+</select>
+</div>
+<div class="col-auto"><button class="btn btn-dark">Gerar relatório</button></div>
+<div class="col-auto"><button type="button" class="btn btn-outline-secondary" onclick="window.print()">Imprimir / PDF</button></div>
+</form>
+<div class="card border-0 shadow-sm mb-4"><div class="card-body"><div class="text-muted">Prejuízo total</div><div class="h2">{{ total|moeda }}</div></div></div>
+<h5>Itens com maior impacto financeiro</h5>
+<table class="table"><tr><th>Item</th><th>Prejuízo</th></tr>{% for nome,valor in ranking %}<tr><td>{{ nome }}</td><td>{{ valor|moeda }}</td></tr>{% else %}<tr><td colspan="2">Excelente! Nenhuma perda encontrada no período.</td></tr>{% endfor %}</table>
+<h5>Detalhamento</h5>
+<table class="table table-sm"><tr><th>Data</th><th>Item</th><th>Motivo</th><th>Qtd.</th><th>Valor</th></tr>{% for p in perdas %}<tr><td>{{ p.data_hora.strftime('%d/%m/%Y') }}</td><td>{{ p.nome_item }}</td><td>{{ p.motivo }}</td><td>{{ p.quantidade|numero }}</td><td>{{ p.valor_perda|moeda }}</td></tr>{% endfor %}</table>
+{% endblock %}

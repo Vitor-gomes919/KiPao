@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Relatório de Compras e Custos</h1>
+<form class="row g-2 mb-4 no-print">
+<div class="col-auto"><input class="form-control" type="date" name="inicio" value="{{ inicio }}"></div>
+<div class="col-auto"><input class="form-control" type="date" name="fim" value="{{ fim }}"></div>
+<div class="col-auto"><button class="btn btn-dark">Gerar relatório</button></div>
+<div class="col-auto"><button type="button" class="btn btn-outline-secondary" onclick="window.print()">Imprimir / PDF</button></div>
+</form>
+<div class="card border-0 shadow-sm mb-4"><div class="card-body"><div class="text-muted">Custo total do período</div><div class="h2">{{ total|moeda }}</div></div></div>
+<h5>Ranking por fornecedor</h5>
+<table class="table"><tr><th>Fornecedor</th><th>Valor</th></tr>{% for nome,valor in ranking %}<tr><td>{{ nome }}</td><td>{{ valor|moeda }}</td></tr>{% else %}<tr><td colspan="2">Nenhuma compra no período.</td></tr>{% endfor %}</table>
+<h5>Compras</h5>
+<table class="table table-sm"><tr><th>Data</th><th>Fornecedor</th><th>Total</th></tr>{% for c in compras %}<tr><td>{{ c.data_hora.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ c.fornecedor.razao_social }}</td><td>{{ c.valor_total|moeda }}</td></tr>{% endfor %}</table>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Frente de Caixa — PDV</h1>
+<form method="post">
+<div class="card border-0 shadow-sm mb-3"><div class="card-body">
+<table class="table" id="itens">
+<thead><tr><th>Produto</th><th>Estoque</th><th>Preço</th><th>Quantidade</th><th></th></tr></thead><tbody></tbody>
+</table>
+<button type="button" class="btn btn-outline-secondary" onclick="addItem()">+ Produto</button>
+</div></div>
+<div class="card border-0 shadow-sm"><div class="card-body">
+<label class="form-label">Forma de pagamento</label>
+<select class="form-select mb-3" name="forma_pagamento_id" required>
+<option value="">Selecione...</option>{% for f in formas %}<option value="{{ f.id }}">{{ f.nome }}</option>{% endfor %}
+</select>
+<button class="btn btn-success btn-lg w-100">Finalizar Venda</button>
+</div></div>
+</form>
+
+<template id="linha">
+<tr>
+<td><select class="form-select produto-select" name="produto_id" required onchange="atualizarInfo(this)">
+<option value="">Selecione...</option>
+{% for p in produtos %}<option value="{{ p.id }}" data-estoque="{{ p.qtd_atual }}" data-preco="{{ p.preco_venda }}">{{ p.nome }}</option>{% endfor %}
+</select></td>
+<td class="estoque">-</td><td class="preco">-</td>
+<td><input class="form-control" type="number" step="0.001" min="0.001" name="quantidade" required></td>
+<td><button type="button" class="btn btn-outline-danger" onclick="this.closest('tr').remove()">Remover</button></td>
+</tr>
+</template>
+{% endblock %}
+{% block scripts %}
+<script>
+function addItem(){document.querySelector("#itens tbody").appendChild(document.querySelector("#linha").content.cloneNode(true));}
+function atualizarInfo(sel){
+  const opt=sel.options[sel.selectedIndex], tr=sel.closest("tr");
+  tr.querySelector(".estoque").textContent = opt.dataset.estoque || "-";
+  tr.querySelector(".preco").textContent = opt.dataset.preco ? "R$ "+Number(opt.dataset.preco).toFixed(2).replace(".",",") : "-";
+}
+addItem();
+</script>
+{% endblock %}

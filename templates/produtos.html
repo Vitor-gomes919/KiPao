@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Produtos Acabados</h1>
+<div class="row g-4">
+<div class="col-lg-4"><div class="card border-0 shadow-sm"><div class="card-body">
+<h5>Novo produto</h5>
+<form method="post">
+<input class="form-control mb-2" name="nome" placeholder="Nome" required>
+<input class="form-control mb-2" name="categoria" placeholder="Categoria">
+<input class="form-control mb-2" name="preco_venda" type="number" step="0.01" min="0" placeholder="Preço de venda" required>
+<input class="form-control mb-3" name="qtd_minima" type="number" step="0.001" min="0" placeholder="Estoque mínimo" required>
+<button class="btn btn-dark w-100">Salvar</button>
+</form>
+</div></div></div>
+<div class="col-lg-8">
+<table class="table table-striped">
+<tr><th>Produto</th><th>Preço</th><th>Saldo</th><th>Custo estimado</th><th>Status</th><th></th></tr>
+{% for p in produtos %}
+<tr>
+<td>{{ p.nome }}</td><td>{{ p.preco_venda|moeda }}</td><td>{{ p.qtd_atual|numero }}</td><td>{{ p.custo_estimado|moeda }}</td>
+<td>{% if p.critico %}<span class="badge text-bg-danger">Crítico</span>{% else %}<span class="badge text-bg-success">OK</span>{% endif %}</td>
+<td><form method="post" action="{{ url_for('produto_toggle', id=p.id) }}"><button class="btn btn-sm btn-outline-secondary">{{ "Inativar" if p.ativo else "Ativar" }}</button></form></td>
+</tr>
+{% endfor %}
+</table>
+</div></div>
+{% endblock %}

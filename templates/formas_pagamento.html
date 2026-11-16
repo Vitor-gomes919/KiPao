@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="page-title">Formas de Pagamento</h1>
+<form method="post">
+<div class="card border-0 shadow-sm"><div class="card-body">
+{% for f in formas %}
+<div class="form-check form-switch mb-3">
+<input class="form-check-input" type="checkbox" name="ativo" value="{{ f.id }}" id="f{{ f.id }}" {% if f.ativo %}checked{% endif %}>
+<label class="form-check-label" for="f{{ f.id }}">{{ f.nome }}</label>
+</div>
+{% endfor %}
+<button class="btn btn-dark">Salvar configurações</button>
+</div></div>
+</form>
+{% endblock %}
