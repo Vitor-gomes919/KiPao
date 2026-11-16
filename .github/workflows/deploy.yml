@@ -1,0 +1,106 @@
+# CI/CD do KiPão
+#  1) CI  - a cada push ou pull request: instala as dependências e roda os testes.
+#  2) CD  - só em push na branch main e se os testes passarem: pede ao Coolify
+#           para publicar a versão nova e acompanha o deploy até terminar.
+#
+# Configuração no GitHub (Settings > Secrets and variables > Actions):
+#   Secret   COOLIFY_TOKEN     token de API do Coolify (permissão deploy + read)
+#   Variable COOLIFY_URL       ex.: https://computacao.fema.edu.br
+#   Variable COOLIFY_APP_UUID  UUID da aplicação no Coolify (aparece na URL dela)
+#   Variable APP_URL           endereço público do app, para o teste final
+
+name: CI/CD - Coolify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # permite rodar na mão pela aba Actions
+
+concurrency:
+  group: deploy-coolify
+  cancel-in-progress: false
+
+jobs:
+  testes:
+    name: Testes (CI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Preparar Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Instalar dependências
+        run: pip install -r requirements-dev.txt
+
+      - name: Rodar os testes
+        run: pytest -v
+
+      - name: Validar o build da imagem Docker
+        run: docker build -t kipao:ci .
+
+  deploy:
+    name: Deploy no Coolify (CD)
+    needs: testes
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: producao
+      url: ${{ vars.APP_URL }}
+    steps:
+      - name: Disparar o deploy no Coolify
+        id: disparo
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          COOLIFY_URL: ${{ vars.COOLIFY_URL }}
+          COOLIFY_APP_UUID: ${{ vars.COOLIFY_APP_UUID }}
+        run: |
+          resposta=$(curl -sS --fail-with-body \
+            -H "Authorization: Bearer $COOLIFY_TOKEN" \
+            "$COOLIFY_URL/api/v1/deploy?uuid=$COOLIFY_APP_UUID&force=false")
+          echo "Resposta do Coolify: $resposta"
+          deploy_uuid=$(echo "$resposta" | jq -r '.deployments[0].deployment_uuid')
+          if [ -z "$deploy_uuid" ] || [ "$deploy_uuid" = "null" ]; then
+            echo "::error::O Coolify não iniciou o deploy."
+            exit 1
+          fi
+          echo "deploy_uuid=$deploy_uuid" >> "$GITHUB_OUTPUT"
+
+      - name: Acompanhar o deploy até terminar
+        env:
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          COOLIFY_URL: ${{ vars.COOLIFY_URL }}
+          DEPLOY_UUID: ${{ steps.disparo.outputs.deploy_uuid }}
+        run: |
+          for i in $(seq 1 60); do
+            status=$(curl -sS -H "Authorization: Bearer $COOLIFY_TOKEN" \
+              "$COOLIFY_URL/api/v1/deployments/$DEPLOY_UUID" | jq -r '.status')
+            echo "[$i] status do deploy: $status"
+            case "$status" in
+              finished) echo "Deploy concluído."; exit 0 ;;
+              failed|cancelled*) echo "::error::Deploy terminou com status $status"; exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo "::error::Tempo esgotado esperando o deploy."
+          exit 1
+
+      - name: Conferir o app no ar
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          for i in $(seq 1 12); do
+            codigo=$(curl -s -o /dev/null -w '%{http_code}' "$APP_URL/login" || true)
+            echo "[$i] $APP_URL/login -> HTTP $codigo"
+            [ "$codigo" = "200" ] && { echo "App respondendo."; exit 0; }
+            sleep 5
+          done
+          echo "::error::O app não respondeu em $APP_URL"
+          exit 1
