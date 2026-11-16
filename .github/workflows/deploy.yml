@@ -62,10 +62,23 @@ jobs:
           COOLIFY_URL: ${{ vars.COOLIFY_URL }}
           COOLIFY_APP_UUID: ${{ vars.COOLIFY_APP_UUID }}
         run: |
-          resposta=$(curl -sS --fail-with-body \
-            -H "Authorization: Bearer $COOLIFY_TOKEN" \
-            "$COOLIFY_URL/api/v1/deploy?uuid=$COOLIFY_APP_UUID&force=false")
-          echo "Resposta do Coolify: $resposta"
+          url="$COOLIFY_URL/api/v1/deploy?uuid=$COOLIFY_APP_UUID&force=false"
+          chamar() {
+            curl -sS -X "$1" -o resposta.json -w '%{http_code}' \
+              -H "Authorization: Bearer $COOLIFY_TOKEN" \
+              -H "Accept: application/json" "$url"
+          }
+          codigo=$(chamar GET)
+          echo "GET  -> HTTP $codigo: $(cat resposta.json)"
+          if [ "$codigo" = "405" ]; then
+            codigo=$(chamar POST)
+            echo "POST -> HTTP $codigo: $(cat resposta.json)"
+          fi
+          if [ "$codigo" != "200" ]; then
+            echo "::error::Coolify respondeu HTTP $codigo"
+            exit 1
+          fi
+          resposta=$(cat resposta.json)
           deploy_uuid=$(echo "$resposta" | jq -r '.deployments[0].deployment_uuid')
           if [ -z "$deploy_uuid" ] || [ "$deploy_uuid" = "null" ]; then
             echo "::error::O Coolify não iniciou o deploy."
