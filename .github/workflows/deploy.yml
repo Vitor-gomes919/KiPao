@@ -28,10 +28,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Baixar o código
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Preparar Python 3.12
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
@@ -62,18 +62,12 @@ jobs:
           COOLIFY_URL: ${{ vars.COOLIFY_URL }}
           COOLIFY_APP_UUID: ${{ vars.COOLIFY_APP_UUID }}
         run: |
-          url="$COOLIFY_URL/api/v1/deploy?uuid=$COOLIFY_APP_UUID&force=false"
-          chamar() {
-            curl -sS -X "$1" -o resposta.json -w '%{http_code}' \
-              -H "Authorization: Bearer $COOLIFY_TOKEN" \
-              -H "Accept: application/json" "$url"
-          }
-          codigo=$(chamar GET)
-          echo "GET  -> HTTP $codigo: $(cat resposta.json)"
-          if [ "$codigo" = "405" ]; then
-            codigo=$(chamar POST)
-            echo "POST -> HTTP $codigo: $(cat resposta.json)"
-          fi
+          # Nesta versão do Coolify o endpoint de deploy aceita apenas POST
+          codigo=$(curl -sS -X POST -o resposta.json -w '%{http_code}' \
+            -H "Authorization: Bearer $COOLIFY_TOKEN" \
+            -H "Accept: application/json" \
+            "$COOLIFY_URL/api/v1/deploy?uuid=$COOLIFY_APP_UUID&force=false")
+          echo "Coolify respondeu HTTP $codigo: $(cat resposta.json)"
           if [ "$codigo" != "200" ]; then
             echo "::error::Coolify respondeu HTTP $codigo"
             exit 1
