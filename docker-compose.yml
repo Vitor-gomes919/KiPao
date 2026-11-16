@@ -1,0 +1,26 @@
+services:
+  kipao:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      # No Coolify, SERVICE_PASSWORD_64_* gera uma chave aleatória automaticamente.
+      # Rodando local, se vier vazia o app usa a chave de desenvolvimento.
+      SECRET_KEY: ${SERVICE_PASSWORD_64_KIPAO:-}
+      # Banco SQLite dentro do volume persistente
+      DATABASE_URL: sqlite:////app/instance/kipao.db
+      FLASK_DEBUG: "0"
+    expose:
+      - "5000"
+    volumes:
+      - kipao-dados:/app/instance
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/login')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  kipao-dados:

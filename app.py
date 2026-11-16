@@ -14,15 +14,15 @@ from flask_login import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
+from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "kipao-dev-secret-key")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-    "DATABASE_URL",
-    "sqlite:///kipao.db"
-)
+# Atrás do proxy do Coolify (HTTPS), respeita os cabeçalhos X-Forwarded-*
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY") or "kipao-dev-secret-key"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL") or "sqlite:///kipao.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -1012,9 +1012,16 @@ def seed():
     db.session.commit()
 
 
-if __name__ == "__main__":
+def inicializar_banco():
+    """Cria as tabelas e os dados iniciais (roda ao subir o app, inclusive no gunicorn)."""
+    os.makedirs(app.instance_path, exist_ok=True)
     with app.app_context():
         db.create_all()
         seed()
 
-    app.run(debug=True)
+
+inicializar_banco()
+
+
+if __name__ == "__main__":
+    app.run(debug=os.getenv("FLASK_DEBUG", "1") == "1")
